@@ -1,32 +1,68 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app id="inspire">
+    <v-navigation-drawer v-model="drawer" app clipped>
+      <v-list dense>
+        <v-list-item v-for="item in items" :key="item.title" router :to="item.route">
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+    <v-content>
+      <router-view />
+    </v-content>
+
+    <v-app-bar app clipped-left>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-toolbar-title>Bem-vindo ao Sistema!</v-toolbar-title>
+    </v-app-bar>
+
+    <v-footer padless>
+      <div class="flex-grow-1"></div>
+      <div>Sistema de Monitoramento de Terraplenos e Estruturas de Contenção&copy; {{ new Date().getFullYear() }}</div>
+    </v-footer>
+  </v-app>
 </template>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
 
-#nav {
-  padding: 30px;
-}
+<script>
+export default {
+  props: {
+    source: String
+  },
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+  data: () => ({
+    drawer: null,
+    username: "",
+    password: "",
+    logado: false,
+    items: [
+      {
+        title: "Cadastrar usuário",
+        icon: "mdi-account-card-details-outline",
+        route: "/cadastrousuario"
+      },
 
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+      {
+        title: "Cadastrar ficha",
+        icon: "mdi-file-edit-outline",
+        route: "/cadastroficha"
+      },
+
+      {
+        title: "Historico",
+        icon: "mdi-file-search-outline",
+        route: "/historico"
+      }
+    ]
+  }),
+  created() {
+    this.$vuetify.theme.dark = true;
+  }
+};
+</script>
