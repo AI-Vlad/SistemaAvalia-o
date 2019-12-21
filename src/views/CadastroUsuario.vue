@@ -41,14 +41,7 @@
           </v-col>
 
           <v-col cols="12" md="2">
-            <v-text-field
-              v-model="cpf"
-              label="CPF *"
-              type="number"
-              :rules="cpfRules"
-              :counter="11"
-              required
-            ></v-text-field>
+            <v-text-field v-model="cpf" label="CPF *" :rules="cpfRules" :counter="11" required></v-text-field>
           </v-col>
 
           <v-col cols="12" md="2">
@@ -64,28 +57,14 @@
   </div>
 </template>
 <script>
+import HttpRequestUtil from "@/util/HttpRequestUtil";
 export default {
   data: () => ({
-    usuario: "",
-    senha: "",
-    cpf: "",
-    rg: "",
     nome: "",
-    telefone: "",
-    sexo: "",
     email: "",
-    cep: "",
-    endereco: "",
-    numero: "",
-    bairro: "",
-    cidade: "",
-    uf: "",
-    complemento: "",
-    items: [
-      { text: "Masculino", value: "M" },
-      { text: "Feminino", value: "F" },
-      { text: "Outro", value: "O" }
-    ],
+    cpf: "",
+    senha: "",
+
     salvo: false,
     naoCadastrado: false,
     y: "top",
@@ -96,15 +75,50 @@ export default {
     cpfRules: [
       v => !!v || "CPF é obrigatório!",
       v => v.length <= 11 || "O CPF deve ter 11 digitos"
-    ],
-    rgRules: [
-      v => !!v || "RG é obrigatório!",
-      v => v.length <= 7 || "O RG deve ter 7 digitos"
-    ],
-    telRules: [
-      v => !!v || "Telefone é obrigatório!",
-      v => v.length <= 11 || "O Telefone deve até 11 digitos"
     ]
-  })
+  }),
+
+  methods: {
+    salvar() {
+      let ehvalido = this.validar();
+
+      if (ehvalido) {
+        let usuario = {};
+        usuario.nome = this.nome;
+        usuario.email = this.email;
+        usuario.cpf = this.cpf;
+        usuario.senha = this.senha;
+
+        alert(JSON.stringify(usuario));
+
+        HttpRequestUtil.salvarUsuario(usuario).then(Usuario => {
+          this.salvo = true;
+          this.limparCampos();
+        });
+      } else {
+        this.naoCadastrado = true;
+      }
+    },
+
+    validar() {
+      if (
+        this.nome == "" ||
+        this.senha == "" ||
+        this.email == "" ||
+        this.cpf == null
+      ) {
+        return false;
+      }
+      return true;
+    },
+
+    limparCampos() {
+      this.nome = "";
+      this.senha = "";
+      this.email = "";
+
+      this.cpf = "";
+    }
+  }
 };
 </script>

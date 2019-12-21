@@ -8,7 +8,7 @@
         color="red"
         :top="y === 'top'"
       >
-        Os campos CPF, NOME, E-MAIL e SENHA são obrigatórios!
+        Os campos DATA, LOCAL, IDENTIFICAÇÃO, RODOVIA E RISCO são obrigatórios!
         <v-btn dark text @click="naoCadastrado = false">Fechar</v-btn>
       </v-snackbar>
     </div>
@@ -43,7 +43,7 @@
               <template v-slot:activator="{ on }">
                 <v-text-field
                   v-model="date"
-                  label="Data da ficha"
+                  label="Data da ficha *"
                   prepend-icon="mdi-calendar"
                   readonly
                   v-on="on"
@@ -58,17 +58,17 @@
           </v-col>
 
           <v-col cols="12" md="8">
-            <v-text-field v-model="local" label="Local" :rules="nameRules" :counter="20" required></v-text-field>
+            <v-text-field v-model="local" label="Local *" :rules="nameRules" :counter="20" required></v-text-field>
           </v-col>
 
           <v-col cols="12" md="6">
-            <v-text-field v-model="identificação" label="Identificação da ficha" required></v-text-field>
+            <v-text-field v-model="identificação" label="Identificação da ficha *" required></v-text-field>
           </v-col>
 
           <v-col cols="12" md="4">
             <v-text-field
               v-model="rodovia"
-              label="Rodovia"
+              label="Rodovia *"
               :rules="rodoviaRules"
               :counter="20"
               required
@@ -76,30 +76,31 @@
           </v-col>
 
           <v-col cols="12" md="2">
-            <v-text-field v-model="risco" label="Risco" required></v-text-field>
+            <v-text-field v-model="risco" label="Risco *" required></v-text-field>
           </v-col>
+          <div>
+            <v-file-input
+              v-model="fotos"
+              color="deep-purple accent-4"
+              counter
+              label="Caixa de fotos"
+              multiple
+              placeholder="Adicione até 3 fotos da sua avaliação *"
+              prepend-icon="mdi-paperclip"
+              outlined
+              :show-size="1000"
+              class="mt-5"
+            >
+              <template v-slot:selection="{ index, text }">
+                <v-chip v-if="index < 2" color="deep-purple accent-4" dark label small>{{ text }}</v-chip>
 
-          <v-file-input
-            v-model="files"
-            color="deep-purple accent-4"
-            counter
-            label="Caixa de fotos"
-            multiple
-            placeholder="Adicione até 3 fotos da sua avaliação"
-            prepend-icon="mdi-paperclip"
-            outlined
-            :show-size="1000"
-            class="mt-5"
-          >
-            <template v-slot:selection="{ index, text }">
-              <v-chip v-if="index < 2" color="deep-purple accent-4" dark label small>{{ text }}</v-chip>
-
-              <span
-                v-else-if="index === 2"
-                class="overline grey--text text--darken-3 mx-2"
-              >+{{ files.length - 2 }} File(s)</span>
-            </template>
-          </v-file-input>
+                <span
+                  v-else-if="index === 2"
+                  class="overline grey--text text--darken-3 mx-2"
+                >+{{ fotos.length - 2 }} File(s)</span>
+              </template>
+            </v-file-input>
+          </div>
         </v-row>
 
         <div class="text-center">
@@ -110,20 +111,23 @@
   </div>
 </template>
 <script>
+import HttpRequestUtil from "@/util/HttpRequestUtil";
 export default {
   data: () => ({
     date: new Date().toISOString().substr(0, 10),
     modal: false,
 
     local: "",
-
+    fotos: [],
     identificação: "",
+    rodovia: "",
+    risco: "",
 
     salvo: false,
     naoCadastrado: false,
     y: "top",
     nameRules: [
-      v => !!v || "Nome é obrigatório!",
+      v => !!v || "Local é obrigatório!",
       v => v.length <= 20 || "O local deve ter até 20 caracteres"
     ],
     rodoviaRules: [
@@ -138,6 +142,55 @@ export default {
       v => !!v || "Telefone é obrigatório!",
       v => v.length <= 11 || "O Telefone deve até 11 digitos"
     ]
-  })
+  }),
+
+  methods: {
+    salvar() {
+      let ehvalido = this.validar();
+
+      if (ehvalido) {
+        let ficha = {};
+        ficha.data = this.date;
+        ficha.local = this.local;
+        ficha.fotos = this.fotos;
+        ficha.identificação = this.identificação;
+        ficha.rodovia = this.rodovia;
+
+        ficha.risco = this.risco;
+
+        alert(JSON.stringify(ficha));
+
+        HttpRequestUtil.salvarFicha(ficha).then(Ficha => {
+          this.salvo = true;
+          this.limparCampos();
+        });
+      } else {
+        this.naoCadastrado = true;
+      }
+    },
+
+    validar() {
+      if (
+        this.date == "" ||
+        this.identificação == "" ||
+        this.local == "" ||
+        this.fotos == null ||
+        this.rodovia == "" ||
+        this.risco == ""
+      ) {
+        return false;
+      }
+      return true;
+    },
+
+    limparCampos() {
+      this.date = "";
+      this.identificação = "";
+      this.local = "";
+      this.rodovia = "";
+      this.risco = "";
+      this.fotos = null;
+    }
+  }
 };
 </script>
